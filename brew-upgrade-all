@@ -1,0 +1,5 @@
+#!/bin/bash
+
+brew update
+brew upgrade --formula $(brew list --formula)
+brew upgrade --casks $(brew list --cask)
