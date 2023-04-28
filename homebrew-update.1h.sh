@@ -21,7 +21,7 @@ brew (){
     ${HOMEBREW_BIN} $@
 }
 
-brew update --auto-update --quiet 2>&1 >/dev/null
+brew update >> /dev/null 2>&1
 
 formulae=$(brew install --dry-run --formulae --quiet $(brew list --formulae) 2>/dev/null | sed -e '1,/==> Would install/d' | tr " " "\n")
 casks=$(brew install --dry-run --casks --quiet $(brew list --casks) 2>/dev/null | sed -e '1,/==> Would install/d' | tr " " "\n")
