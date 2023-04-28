@@ -48,7 +48,9 @@ if [ $# -eq 0 ]; then
         echo "No casks to update"
     fi
     echo "---"
-    echo "Brew Upgrade All | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=upgrade param2=&& param3=exit terminal=true refresh=true"
+    if [[ "${count_all}" != "0" ]]; then
+        echo "Brew Upgrade All | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=upgrade param2=&& param3=exit terminal=true refresh=true"
+    fi
     echo "Brew Cleanup | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=cleanup param2=&& param3=exit terminal=true refresh=true"
     echo "---"
     echo "Refresh | refresh=true"
