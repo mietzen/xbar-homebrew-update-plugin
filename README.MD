@@ -7,7 +7,7 @@ This [xbar](https://github.com/matryer/xbar) plugin let's you update `formulae` 
 Download the shell script:
 
 ```Shell
-wget -qO- your_link_here | tar xvz -C "~/Library/Application Support/xbar/plugins/" --strip-components=1
+wget -qO- https://github.com/mietzen/xbar-homebrew-update-plugin/archive/refs/heads/main.tar.gz | tar xvz -C "~/Library/Application Support/xbar/plugins/" --strip-components=1
 ln -s ~/Library/Application Support/xbar/plugins/homebrew-update/homebrew-update.1h.sh ~/Library/Application Support/xbar/plugins/homebrew-update.1h.sh    
 ```
 
