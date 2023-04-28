@@ -79,9 +79,9 @@ if [ $# -eq 0 ]; then
         echo "-- Enable Notification | bash=touch param1=${ASSESTS_DIR}/.notify terminal=false refresh=true"
     fi
     if [ -f ${ASSESTS_DIR}/.darkmode ]; then
-        echo "-- Disable Darkmode | bash=rm param1=-f param2=${ASSESTS_DIR}/.darkmode terminal=false refresh=true"
+        echo "-- Lightmode | bash=rm param1=-f param2=${ASSESTS_DIR}/.darkmode terminal=false refresh=true"
     else
-        echo "-- Enable Darkmode | bash=touch param1=${ASSESTS_DIR}/.darkmode terminal=false refresh=true"
+        echo "-- Darkmode | bash=touch param1=${ASSESTS_DIR}/.darkmode terminal=false refresh=true"
     fi
     echo "---"
     echo "Refresh | refresh=true"
@@ -93,6 +93,7 @@ else
         if [[ "${count_casks}" != "0" ]]; then
             brew upgrade --casks ${casks}
         fi
+        sleep 3
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
     fi
     if [[ ${1} == 'cleanup' ]]; then
