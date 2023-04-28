@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SCRIPT_NAME=$(basename "$0")
-ASSESTS_DIR=${SCRIPT_DIR}/homebrew-update/assests
+ASSETS_DIR=${SCRIPT_DIR}/homebrew-update/assets
 
 if [ -f /opt/homebrew/bin/brew ]; then
     HOMEBREW_BIN=/opt/homebrew/bin/brew
@@ -31,19 +31,19 @@ count_casks=$(echo ${cask} | wc -w | xargs)
 
 count_all=$((count_formulae + count_casks))
 
-if [ -f ${ASSESTS_DIR}/.darkmode ]; then
-    icon=$(base64 -i ${ASSESTS_DIR}/icon_dark.png)
-    icon_attention=$(base64 -i ${ASSESTS_DIR}/icon_attention_dark.png)
+if [ -f ${ASSETS_DIR}/.darkmode ]; then
+    icon=$(base64 -i ${ASSETS_DIR}/icon_dark.png)
+    icon_attention=$(base64 -i ${ASSETS_DIR}/icon_attention_dark.png)
 else
-    icon=$(base64 -i ${ASSESTS_DIR}/icon.png)
-    icon_attention=$(base64 -i ${ASSESTS_DIR}/icon_attention.png)
+    icon=$(base64 -i ${ASSETS_DIR}/icon.png)
+    icon_attention=$(base64 -i ${ASSETS_DIR}/icon_attention.png)
 fi
 
 if [ $# -eq 0 ]; then
     if [[ "${count_all}" != "0" ]]; then
         echo " | templateImage=${icon_attention}"
-        if [ -f ${ASSESTS_DIR}/.notify ]; then
-            ${ASSESTS_DIR}/notifier.app/Contents/MacOS/applet
+        if [ -f ${ASSETS_DIR}/.notify ]; then
+            ${ASSETS_DIR}/notifier.app/Contents/MacOS/applet
         fi
     else
         echo " | templateImage=${icon}"
@@ -73,15 +73,15 @@ if [ $# -eq 0 ]; then
     echo "Brew Cleanup | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=cleanup param2=&& param3=exit terminal=true refresh=true"
     echo "---"
     echo "Settings"
-    if [ -f ${ASSESTS_DIR}/.notify ]; then
-        echo "-- Disable Notification  | bash=rm param1=-f param2=${ASSESTS_DIR}/.notify terminal=false refresh=true"
+    if [ -f ${ASSETS_DIR}/.notify ]; then
+        echo "-- Disable Notification  | bash=rm param1=-f param2=${ASSETS_DIR}/.notify terminal=false refresh=true"
     else
-        echo "-- Enable Notification | bash=touch param1=${ASSESTS_DIR}/.notify terminal=false refresh=true"
+        echo "-- Enable Notification | bash=touch param1=${ASSETS_DIR}/.notify terminal=false refresh=true"
     fi
-    if [ -f ${ASSESTS_DIR}/.darkmode ]; then
-        echo "-- Lightmode | bash=rm param1=-f param2=${ASSESTS_DIR}/.darkmode terminal=false refresh=true"
+    if [ -f ${ASSETS_DIR}/.darkmode ]; then
+        echo "-- Lightmode | bash=rm param1=-f param2=${ASSETS_DIR}/.darkmode terminal=false refresh=true"
     else
-        echo "-- Darkmode | bash=touch param1=${ASSESTS_DIR}/.darkmode terminal=false refresh=true"
+        echo "-- Darkmode | bash=touch param1=${ASSETS_DIR}/.darkmode terminal=false refresh=true"
     fi
     echo "---"
     echo "Refresh | refresh=true"
