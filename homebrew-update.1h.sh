@@ -31,8 +31,13 @@ count_casks=$(echo ${cask} | wc -w | xargs)
 
 count_all=$((count_formulae + count_casks))
 
-icon=$(base64 -i ${ASSESTS_DIR}/icon.png)
-icon_attention=$(base64 -i ${ASSESTS_DIR}/icon_attention.png)
+if [ -f ${ASSESTS_DIR}/.darkmode ]; then
+    icon=$(base64 -i ${ASSESTS_DIR}/icon_dark.png)
+    icon_attention=$(base64 -i ${ASSESTS_DIR}/icon_attention_dark.png)
+else
+    icon=$(base64 -i ${ASSESTS_DIR}/icon.png)
+    icon_attention=$(base64 -i ${ASSESTS_DIR}/icon_attention.png)
+fi
 
 if [ $# -eq 0 ]; then
     if [[ "${count_all}" != "0" ]]; then
@@ -67,10 +72,16 @@ if [ $# -eq 0 ]; then
     fi
     echo "Brew Cleanup | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=cleanup param2=&& param3=exit terminal=true refresh=true"
     echo "---"
+    echo "Settings"
     if [ -f ${ASSESTS_DIR}/.notify ]; then
-        echo "Disable Notification  | bash=rm param1=-f param2=${ASSESTS_DIR}/.notify terminal=false refresh=true"
+        echo "-- Disable Notification  | bash=rm param1=-f param2=${ASSESTS_DIR}/.notify terminal=false refresh=true"
     else
-        echo "Enable Notification | bash=touch param1=${ASSESTS_DIR}/.notify terminal=false refresh=true"
+        echo "-- Enable Notification | bash=touch param1=${ASSESTS_DIR}/.notify terminal=false refresh=true"
+    fi
+    if [ -f ${ASSESTS_DIR}/.darkmode ]; then
+        echo "-- Disable Darkmode | bash=rm param1=-f param2=${ASSESTS_DIR}/.darkmode terminal=false refresh=true"
+    else
+        echo "-- Enable Darkmode | bash=touch param1=${ASSESTS_DIR}/.darkmode terminal=false refresh=true"
     fi
     echo "---"
     echo "Refresh | refresh=true"
