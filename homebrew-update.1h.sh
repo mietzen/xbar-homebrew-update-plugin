@@ -4,6 +4,8 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SCRIPT_NAME=$(basename "$0")
 ASSETS_DIR=${SCRIPT_DIR}/homebrew-update/assets
 
+export HOMEBREW_CASK_OPTS=--no-quarantine
+
 if [ -f /opt/homebrew/bin/brew ]; then
     HOMEBREW_BIN=/opt/homebrew/bin/brew
 else
@@ -57,7 +59,7 @@ if [ $# -eq 0 ]; then
                 echo "${count_formulae} Formulae can be update"
             fi
             for line in ${formulae}; do
-                echo "${ident}${line}" | grep "[a-z]" | sed "s_\(.*\)_& | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=upgrade param2=--formula param3=& param4=\&\& param5=exit terminal=true refresh=true_g"
+                echo "${ident}${line}" | grep "[a-z]" | sed "s_\(.*\)_& | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=upgrade param2=--formula param3=& param4=\&\& param5=killall param6=kTerminal terminal=true refresh=true_g"
             done
         fi
         if [[ "${count_formulae}" == "0" ]]; then
@@ -71,19 +73,19 @@ if [ $# -eq 0 ]; then
                 echo "${count_casks} Casks can be update"
             fi
             for line in ${casks}; do
-                echo "${ident}${line}" | grep "[a-z]" | sed "s_\(.*\)_& | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=upgrade param2=--cask param3=& param4=\&\& param5=exit terminal=true refresh=true_g"
+                echo "${ident}${line}" | grep "[a-z]" | sed "s_\(.*\)_& | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=upgrade param2=--cask param3=& param4=\&\& param5=killall param6=Terminal terminal=true refresh=true_g"
             done
         fi
         if [[ "${count_casks}" == "0" ]]; then
             echo "Casks are up to date!"
         fi
         echo "---"
-        echo "Brew Upgrade All | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=upgrade-all param2=&& param3=exit terminal=true refresh=true"
+        echo "Brew Upgrade All | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=upgrade-all param2=&& param3=killall param4=Terminal terminal=true refresh=true"
     else
         echo "Everthing is up to date!"
         echo "---"
     fi
-    echo "Brew Cleanup | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=cleanup param2=&& param3=exit terminal=true refresh=true"
+    echo "Brew Cleanup | bash=${SCRIPT_DIR}/${SCRIPT_NAME} param1=cleanup param2=&& param3=killall param4=Terminal terminal=true refresh=true"
     echo "---"
     echo "Settings"
     if [ -f ${ASSETS_DIR}/.notify ]; then
@@ -116,8 +118,7 @@ else
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
         fi
         if [[ ${1} == 'cleanup' ]]; then
-            brew cleanup --formulae
-            brew cleanup --casks
+            brew cleanup
         fi
     fi
 fi
