@@ -18,6 +18,3 @@ ln -s "~/Library/Application Support/xbar/plugins/homebrew-update/homebrew-updat
 
 If you click on a `formula` or `cask` a Terminal opens to upgrade the specific `formula` or `cask`. You can also click on `Upgrade All` to update all listed `formulae` and `casks`.
 
-![Notification Demo](assets/notification.png)
-
-You can activate notifications and toggle dark / light mode for the icon.
