@@ -47,16 +47,21 @@ if [ $# -eq 0 ]; then
     fi
     echo "---"
     if [[ -f "${ASSETS_DIR}/.errors" ]]; then
-        echo "Errors while upgrading: | color=red"
-        errors=$(cat "${ASSETS_DIR}/.errors")
-        for err_pkg in ${errors}; do
-            echo "- ${err_pkg}"
-            echo "--Show log | bash=less param1='${ASSETS_DIR}/.log' terminal=true refresh=true"
-            echo "--Reinstall | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=reinstall param2=${err_pkg} terminal=true refresh=true"
-            echo "--Uninstall | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=uninstall param2=${err_pkg} terminal=true refresh=true"
-        done
-        echo "Clear Errors | color=#68696C | bash=rm param1=-rf param2='${ASSETS_DIR}/.errors' terminal=false refresh=true"
-        echo "---"
+        if [[ ! -s "${ASSETS_DIR}/.errors" ]]; then
+            # Delete File if empty
+            rm -rf "${ASSETS_DIR}/.errors"
+        else
+            echo "Errors while upgrading: | color=red"
+            errors=$(cat "${ASSETS_DIR}/.errors")
+            for err_pkg in ${errors}; do
+                echo "- ${err_pkg}"
+                echo "--Show log | bash=less param1='${ASSETS_DIR}/.log' terminal=true refresh=true"
+                echo "--Reinstall | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=reinstall param2=${err_pkg} terminal=true refresh=true"
+                echo "--Uninstall | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=uninstall param2=${err_pkg} terminal=true refresh=true"
+            done
+            echo "Clear Errors | color=#68696C | bash=rm param1=-rf param2='${ASSETS_DIR}/.errors' terminal=false refresh=true"
+            echo "---"
+        fi
     fi
     if [[ "${count_all}" != "0" ]]; then
         if [[ "${count_formulae}" != "0" ]]; then
@@ -117,7 +122,10 @@ else
     if [ "$#" -eq 1 ]; then
         if [[ ${1} == 'upgrade-all' ]]; then
             brew upgrade --greedy-auto-updates 2>&1 | tee "${ASSETS_DIR}/.log"
-            cat "${ASSETS_DIR}/.log" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}' > "${ASSETS_DIR}/.errors"
+            errors=$(cat "${ASSETS_DIR}/.log" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
+            if [[ $errors ]]; then
+                echo "$errors" > "${ASSETS_DIR}/.errors"
+            fi
             sleep 1
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
         fi
