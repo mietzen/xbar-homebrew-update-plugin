@@ -38,12 +38,17 @@ count_all=$((count_formulae + count_casks))
 
 icon=$(base64 -i "${ASSETS_DIR}/icon.png")
 icon_attention=$(base64 -i "${ASSETS_DIR}/icon_attention.png")
+icon_updating=$(base64 -i "${ASSETS_DIR}/icon_updating.png")
 
 if [ $# -eq 0 ]; then
-    if [[ "${count_all}" != "0" ]]; then
-        echo " | templateImage=${icon_attention}"
+    if [[ -f "${ASSETS_DIR}/.updating" ]]; then
+        echo " | templateImage=${icon_updating}"
     else
-        echo " | templateImage=${icon}"
+        if [[ "${count_all}" != "0" ]]; then
+            echo " | templateImage=${icon_attention}"
+        else
+            echo " | templateImage=${icon}"
+        fi
     fi
     echo "---"
     if [[ -f "${ASSETS_DIR}/brew-upgrade.errors" ]]; then
@@ -121,12 +126,16 @@ else
     fi
     if [ "$#" -eq 1 ]; then
         if [[ ${1} == 'upgrade-all' ]]; then
+            touch "${ASSETS_DIR}/.updating"
+            /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+            sleep 1
             brew upgrade --greedy-auto-updates 2>&1 | tee "${ASSETS_DIR}/brew-upgrade.log"
             errors=$(cat "${ASSETS_DIR}/brew-upgrade.log" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
             if [[ $errors ]]; then
                 echo "$errors" > "${ASSETS_DIR}/brew-upgrade.errors"
             fi
             sleep 1
+            rm "${ASSETS_DIR}/.updating"
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
         fi
         if [[ ${1} == 'cleanup' ]]; then
