@@ -56,7 +56,7 @@ if [ $# -eq 0 ]; then
             # Delete File if empty
             rm -rf "${ASSETS_DIR}/brew-upgrade.errors"
         else
-            echo "Errors while upgrading: | color=red"
+            echo "Errors while upgrading: | color=#D92519"
             errors=$(cat "${ASSETS_DIR}/brew-upgrade.errors")
             for err_pkg in ${errors}; do
                 echo "- ${err_pkg}"
@@ -107,7 +107,7 @@ if [ $# -eq 0 ]; then
     echo "Refresh | refresh=true"
 else
     if [ "$#" -eq 3 ] && [ ${1} == 'upgrade' ]; then
-        brew upgrade ${2} ${3} 2>&1 | tee "${ASSETS_DIR}/brew-upgrade.log"
+        brew upgrade ${2} ${3} 2>&1 | awk '{ print strftime("%Y-%m-%d %H:%M:%S"), $0; fflush(); }' | tee "${ASSETS_DIR}/brew-upgrade.log"
         cat "${ASSETS_DIR}/brew-upgrade.log" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}' > "${ASSETS_DIR}/brew-upgrade.errors"
         sleep 1
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
