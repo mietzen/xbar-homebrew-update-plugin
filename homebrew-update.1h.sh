@@ -6,6 +6,12 @@ ASSETS_DIR="${SCRIPT_DIR}/homebrew-update/assets"
 
 export HOMEBREW_CASK_OPTS=--no-quarantine
 
+add_date() {
+    while IFS= read -r line; do
+        printf '%s %s\n' "$(date)" "$line";
+    done
+}
+
 if [ -f /opt/homebrew/bin/brew ]; then
     HOMEBREW_BIN=/opt/homebrew/bin
 else
@@ -107,7 +113,7 @@ if [ $# -eq 0 ]; then
     echo "Refresh | refresh=true"
 else
     if [ "$#" -eq 3 ] && [ ${1} == 'upgrade' ]; then
-        brew upgrade ${2} ${3} 2>&1 | awk '{ print strftime("%Y-%m-%d %H:%M:%S"), $0; fflush(); }' | tee "${ASSETS_DIR}/brew-upgrade.log"
+        brew upgrade ${2} ${3} 2>&1 | add_date | tee "${ASSETS_DIR}/brew-upgrade.log"
         cat "${ASSETS_DIR}/brew-upgrade.log" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}' > "${ASSETS_DIR}/brew-upgrade.errors"
         sleep 1
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
@@ -129,7 +135,7 @@ else
             touch "${ASSETS_DIR}/.updating"
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             sleep 1
-            brew upgrade --greedy-auto-updates 2>&1 | awk '{ print strftime("%Y-%m-%d %H:%M:%S"), $0; fflush(); }' | tee "${ASSETS_DIR}/brew-upgrade.log"
+            brew upgrade --greedy-auto-updates 2>&1 | add_date | tee "${ASSETS_DIR}/brew-upgrade.log"
             errors=$(cat "${ASSETS_DIR}/brew-upgrade.log" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
             if [[ $errors ]]; then
                 echo "$errors" > "${ASSETS_DIR}/brew-upgrade.errors"
