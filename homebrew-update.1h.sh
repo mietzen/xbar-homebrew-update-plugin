@@ -3,14 +3,20 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SCRIPT_NAME=$(basename "$0")
 ASSETS_DIR="${SCRIPT_DIR}/homebrew-update/assets"
+MAX_LOG_HISTORY=10000
 
 export HOMEBREW_CASK_OPTS=--no-quarantine
 
 add_date() {
     while IFS= read -r line; do
-        printf '%s %s\n' "$(date)" "$line";
+        printf '%s %s\n' "$(date '+%d.%m.%Y-%M:%H:%S')" "$line";
     done
 }
+
+# Logrotate after MAX_LOG_HISTORY number of lines
+if [[ $(wc -l <"${ASSETS_DIR}/brew-upgrade.log") -ge ${MAX_LOG_HISTORY} ]]
+    tail -n${MAX_LOG_HISTORY} "${ASSETS_DIR}/brew-upgrade.log" > "${ASSETS_DIR}/brew-upgrade.log"
+fi
 
 if [ -f /opt/homebrew/bin/brew ]; then
     HOMEBREW_BIN=/opt/homebrew/bin
@@ -113,29 +119,39 @@ if [ $# -eq 0 ]; then
     echo "Refresh | refresh=true"
 else
     if [ "$#" -eq 3 ] && [ ${1} == 'upgrade' ]; then
-        brew upgrade ${2} ${3} 2>&1 | add_date | tee "${ASSETS_DIR}/brew-upgrade.log"
+        echo "Starting brew upgrade ${2} ${3}" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+        touch "${ASSETS_DIR}/.updating"
+        /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+        sleep 1
+        brew upgrade ${2} ${3} 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
         cat "${ASSETS_DIR}/brew-upgrade.log" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}' > "${ASSETS_DIR}/brew-upgrade.errors"
         sleep 1
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+        echo "Finished brew upgrade ${2} ${3}" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
     fi
     if [ "$#" -eq 2 ] && [ ${1} == 'reinstall' ]; then
+        echo "Starting brew reinstall ${2}" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
         brew reinstall ${2} 2>&1
         cat "${ASSETS_DIR}/brew-upgrade.errors" | grep -v ${2} > "${ASSETS_DIR}/brew-upgrade.errors"
         sleep 1
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+        echo "Finished brew reinstall ${2}" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
     fi
     if [ "$#" -eq 2 ] && [ ${1} == 'uninstall' ]; then
+        echo "Starting brew uninstall ${2}" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
         brew uninstall ${2} 2>&1
         cat "${ASSETS_DIR}/brew-upgrade.errors" | grep -v ${2} > "${ASSETS_DIR}/brew-upgrade.errors"
         sleep 1
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+        echo "Finished brew uninstall ${2}" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
     fi
     if [ "$#" -eq 1 ]; then
         if [[ ${1} == 'upgrade-all' ]]; then
+            echo "Starting brew upgrade --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
             touch "${ASSETS_DIR}/.updating"
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             sleep 1
-            brew upgrade --greedy-auto-updates 2>&1 | add_date | tee "${ASSETS_DIR}/brew-upgrade.log"
+            brew upgrade --greedy-auto-updates 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
             errors=$(cat "${ASSETS_DIR}/brew-upgrade.log" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
             if [[ $errors ]]; then
                 echo "$errors" > "${ASSETS_DIR}/brew-upgrade.errors"
@@ -143,9 +159,12 @@ else
             sleep 1
             rm "${ASSETS_DIR}/.updating"
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+            echo "Finished brew upgrade --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
         fi
         if [[ ${1} == 'cleanup' ]]; then
+            echo "Starting brew cleanup" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
             brew cleanup
+            echo "Finished brew cleanup" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
         fi
     fi
 fi
