@@ -14,7 +14,7 @@ add_date() {
 }
 
 # Logrotate after MAX_LOG_HISTORY number of lines
-if [[ $(wc -l <"${ASSETS_DIR}/brew-upgrade.log") -ge ${MAX_LOG_HISTORY} ]]
+if [[ $(wc -l <"${ASSETS_DIR}/brew-upgrade.log") -ge ${MAX_LOG_HISTORY} ]]; then
     tail -n${MAX_LOG_HISTORY} "${ASSETS_DIR}/brew-upgrade.log" > "${ASSETS_DIR}/brew-upgrade.log"
 fi
 
