@@ -88,8 +88,10 @@ if [ $# -eq 0 ]; then
                 echo "${count_formulae} Formulae can be update"
             fi
             for line in ${formulae}; do
-                echo "${ident}${line}" | grep "[a-z]" | sed "s_\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--formula param3=& terminal=false refresh=true_g"
+                echo "${ident}${line}" | grep "[a-z]" | sed "s_--\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--cask param3=\1 terminal=false refresh=true_g"
             done
+            echo "---"
+            echo "Brew Upgrade All Formulae | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all-formulae terminal=false refresh=true"
         fi
         if [[ "${count_formulae}" == "0" ]]; then
             echo "Formulae are up to date!"
@@ -102,8 +104,10 @@ if [ $# -eq 0 ]; then
                 echo "${count_casks} Casks can be update"
             fi
             for line in ${casks}; do
-                echo "${ident}${line}" | grep "[a-z]" | sed "s_\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--cask param3=& terminal=false refresh=true_g"
+                echo "${ident}${line}" | grep "[a-z]" | sed "s_--\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--cask param3=\1 terminal=false refresh=true_g"
             done
+            echo "---"
+            echo "Brew Upgrade All Casks | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all-casks terminal=false refresh=true"
         fi
         if [[ "${count_casks}" == "0" ]]; then
             echo "Casks are up to date!"
