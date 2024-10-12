@@ -50,8 +50,15 @@ outdated="$(brew outdated --greedy-auto-updates --json)"
 ignore_formulae=$(jq -r '.formulae[]' "${IGNORE_FILE}")
 ignore_casks=$(jq -r '.casks[]' "${IGNORE_FILE}")
 
-formulae=$(echo "${outdated}" | jq '.formulae.[].name' -r | grep -vF -e "$(echo "${ignore_formulae}")" | xargs)
-casks=$(echo "${outdated}" | jq '.casks.[].name' -r | grep -vF -e "$(echo "${ignore_casks}")" | xargs)
+# Filter out ignored formulae
+formulae=$(echo "${outdated}" | jq '.formulae.[].name' -r | while read -r formula; do
+    echo "${ignore_formulae}" | grep -q "${formula}" || echo "${formula}"
+done | xargs)
+
+# Filter out ignored casks
+casks=$(echo "${outdated}" | jq '.casks.[].name' -r | while read -r cask; do
+    echo "${ignore_casks}" | grep -q "${cask}" || echo "${cask}"
+done | xargs)
 
 count_formulae=$(echo ${formulae} | wc -w | xargs)
 count_casks=$(echo ${casks} | wc -w | xargs)
@@ -128,12 +135,12 @@ if [ $# -eq 0 ]; then
         echo "---"
         echo "Brew Upgrade All | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all terminal=false refresh=true"
         echo "---"
-        echo "Manage Ignore List"
+        echo "Add to ignore list"
         for line in ${formulae}; do
-            echo "--Ignore ${line} | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=ignore param2=formulae param3=${line} terminal=false refresh=true"
+            echo "--${line} | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=ignore param2=formulae param3=${line} terminal=false refresh=true"
         done
         for line in ${casks}; do
-            echo "--Ignore ${line} | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=ignore param2=casks param3=${line} terminal=false refresh=true"
+            echo "--${line} | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=ignore param2=casks param3=${line} terminal=false refresh=true"
         done
         if [[ "${count_ignore_all}" != "0" ]]; then
             echo "Open Ignore List | bash=/usr/bin/open param1='${IGNORE_FILE}' terminal=false refresh=true"
@@ -160,8 +167,7 @@ else
     if [ "$#" -eq 3 ] && [ "${1}" == 'ignore' ]; then
         ignore_type="${2}"
         ignore_item="${3}"
-        # Update ignore list in JSON file
-        jq --arg item "${ignore_item}" '.[$ignore_type] += [$item]' "${IGNORE_FILE}" > "${IGNORE_FILE}"
+        jq --arg item "${ignore_item}" '.[$ignore_type] += [$item]' "${IGNORE_FILE}" | jq '.' --indent 4 > "${IGNORE_FILE}"
         echo "Ignored ${ignore_item} in ${ignore_type}" | tee -a "${ASSETS_DIR}/brew-upgrade.log"
         exit
     fi
