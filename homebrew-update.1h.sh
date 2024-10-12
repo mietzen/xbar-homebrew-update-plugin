@@ -170,6 +170,7 @@ if [ $# -eq 0 ]; then
     echo "---"
     echo "Refresh | refresh=true"
 else
+    nohup caffeinate -dism -w $$ >/dev/null 2>&1 &
     if [ "$#" -eq 3 ] && [ ${1} == 'upgrade' ]; then
         echo "Starting brew upgrade ${2} ${3}" | add_date | tee -a "${LOG_FILE}"
         touch "${ASSETS_DIR}/.updating"
