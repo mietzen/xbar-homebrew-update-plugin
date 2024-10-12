@@ -4,7 +4,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SCRIPT_NAME=$(basename "$0")
 ASSETS_DIR=${SCRIPT_DIR}/homebrew-update/assets
 MAX_LOG_HISTORY=10000
-IGNORE_FILE=${ASSETS_DIR}/brew-upgrade.ignore
+IGNORE_FILE=${ASSETS_DIR}/brew-upgrade-ignore.json
 LOG_FILE=${ASSETS_DIR}/brew-upgrade.log
 ERR_FILE=${ASSETS_DIR}/brew-upgrade.errors
 
@@ -173,9 +173,10 @@ else
     if [ "$#" -eq 3 ] && [ "${1}" == 'ignore' ]; then
         ignore_type="${2}"
         ignore_item="${3}"
-        jq --arg item "${ignore_item}" '.[$ignore_type] += [$item]' "${IGNORE_FILE}" | jq '.' --indent 4 > "${IGNORE_FILE}"
+        jq --arg item "${ignore_item}" '.[$ignore_type] += [$item]' "${IGNORE_FILE}" | jq '.' --indent 4 > "${IGNORE_FILE}.tmp" && mv "${IGNORE_FILE}.tmp" "${IGNORE_FILE}"
         echo "Ignored ${ignore_item} in ${ignore_type}" | tee -a "${LOG_FILE}"
-        exit
+        /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+        sleep 1
     fi
     if [ "$#" -eq 2 ] && [ ${1} == 'reinstall' ]; then
         echo "Starting brew reinstall ${2}" | add_date | tee -a "${LOG_FILE}"

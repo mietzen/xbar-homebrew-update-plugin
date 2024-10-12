@@ -1,4 +1,4 @@
 .DS_Store
 assets/brew-upgrade.log
 assets/brew-upgrade.errors
-assets/brew-upgrade.ignore
+assets/brew-upgrade-ignore.json
