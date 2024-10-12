@@ -7,6 +7,12 @@ MAX_LOG_HISTORY=10000
 IGNORE_FILE=${ASSETS_DIR}/brew-upgrade-ignore.json
 LOG_FILE=${ASSETS_DIR}/brew-upgrade.log
 ERR_FILE=${ASSETS_DIR}/brew-upgrade.errors
+if [[ -f "${ASSETS_DIR}/.term" ]]; then
+    TERM=true
+else
+    TERM=false
+fi
+
 
 # Create an empty ignore file if it doesn't exist
 if [[ ! -f "${IGNORE_FILE}" ]]; then
@@ -112,10 +118,10 @@ if [ $# -eq 0 ]; then
                 echo "${count_formulae} Formulae can be update"
             fi
             for line in ${formulae}; do
-                echo "${ident}${line}" | grep "[a-z]" | sed "s_${ident}\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--cask param3=\1 terminal=false refresh=true_g"
+                echo "${ident}${line}" | grep "[a-z]" | sed "s_${ident}\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--cask param3=\1 terminal=${TERM} refresh=true_g"
             done
             if [[ "${count_formulae}" -gt 1 ]]; then
-                echo "Brew Upgrade All Formulae | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all-formulae terminal=false refresh=true"
+                echo "Brew Upgrade All Formulae | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all-formulae terminal=${TERM} refresh=true"
             fi
         fi
         if [[ "${count_formulae}" == "0" ]]; then
@@ -129,18 +135,17 @@ if [ $# -eq 0 ]; then
                 echo "${count_casks} Casks can be update"
             fi
             for line in ${casks}; do
-                echo "${ident}${line}" | grep "[a-z]" | sed "s_${ident}\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--cask param3=\1 terminal=false refresh=true_g"
+                echo "${ident}${line}" | grep "[a-z]" | sed "s_${ident}\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--cask param3=\1 terminal=${TERM} refresh=true_g"
             done
             if [[ "${count_casks}" -gt 1 ]]; then
-                echo "Brew Upgrade All Casks | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all-casks terminal=false refresh=true"
+                echo "Brew Upgrade All Casks | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all-casks terminal=${TERM} refresh=true"
             fi
         fi
         if [[ "${count_casks}" == "0" ]]; then
             echo "Casks are up to date!"
         fi
         echo "---"
-        echo "Brew Upgrade All | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all terminal=false refresh=true"
-        echo "---"
+        echo "Brew Upgrade All | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all terminal=${TERM} refresh=true"
         echo "Add to ignore list"
         for line in ${formulae}; do
             echo "--${line} | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=ignore param2=formulae param3=${line} terminal=false refresh=true"
@@ -155,7 +160,13 @@ if [ $# -eq 0 ]; then
         echo "Everthing is up to date!"
         echo "---"
     fi
-    echo "Brew Cleanup | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=cleanup terminal=false refresh=true"
+    echo "Brew Cleanup | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=cleanup terminal=${TERM} refresh=true"
+    echo "---"
+    if [[ ${TERM} == 'true' ]]; then
+        echo "Hide Terminal | bash='rm' param1=${ASSETS_DIR}/.term terminal=false refresh=true"
+    else
+        echo "Show Terminal | bash='touch' param1=${ASSETS_DIR}/.term terminal=false refresh=true"
+    fi
     echo "---"
     echo "Refresh | refresh=true"
 else
@@ -173,8 +184,8 @@ else
     if [ "$#" -eq 3 ] && [ "${1}" == 'ignore' ]; then
         ignore_type="${2}"
         ignore_item="${3}"
-        jq --arg item "${ignore_item}" '.[$ignore_type] += [$item]' "${IGNORE_FILE}" | jq '.' --indent 4 > "${IGNORE_FILE}.tmp" && mv "${IGNORE_FILE}.tmp" "${IGNORE_FILE}"
-        echo "Ignored ${ignore_item} in ${ignore_type}" | tee -a "${LOG_FILE}"
+        jq --arg item "${ignore_item}" --arg ignore_type "${ignore_type}" '.[$ignore_type] += [$item]' "${IGNORE_FILE}" | jq '.' --indent 4 > "${IGNORE_FILE}.tmp" && mv "${IGNORE_FILE}.tmp" "${IGNORE_FILE}"
+        echo "Ignored ${ignore_item} in ${ignore_type}" | add_date | tee -a "${LOG_FILE}"
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
         sleep 1
     fi
