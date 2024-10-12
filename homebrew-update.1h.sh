@@ -145,7 +145,6 @@ if [ $# -eq 0 ]; then
             echo "Casks are up to date!"
         fi
         echo "---"
-        echo "Brew Upgrade All | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all terminal=${TERM} refresh=true"
         echo "Add to ignore list"
         for line in ${formulae}; do
             echo "--${line} | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=ignore param2=formulae param3=${line} terminal=false refresh=true"
@@ -156,6 +155,7 @@ if [ $# -eq 0 ]; then
         if [[ "${count_ignore_all}" != "0" ]]; then
             echo "Open Ignore List | bash=/usr/bin/open param1='${IGNORE_FILE}' terminal=false refresh=true"
         fi
+        echo "Brew Upgrade All | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all terminal=${TERM} refresh=true"
     else
         echo "Everthing is up to date!"
         echo "---"
@@ -170,7 +170,9 @@ if [ $# -eq 0 ]; then
     echo "---"
     echo "Refresh | refresh=true"
 else
-    nohup caffeinate -dism -w $$ >/dev/null 2>&1 &
+    if [ "$#" -gt 0 ]; then
+        nohup caffeinate -dism -w $$ >/dev/null 2>&1 &
+    fi
     if [ "$#" -eq 3 ] && [ ${1} == 'upgrade' ]; then
         echo "Starting brew upgrade ${2} ${3}" | add_date | tee -a "${LOG_FILE}"
         touch "${ASSETS_DIR}/.updating"
