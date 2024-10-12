@@ -222,6 +222,36 @@ else
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             echo "Finished brew upgrade --greedy-auto-updates" | add_date | tee -a "${LOG_FILE}"
         fi
+        if [[ ${1} == 'upgrade-all-formulae' ]]; then
+            echo "Starting brew upgrade --formula --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+            touch "${ASSETS_DIR}/.updating"
+            /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+            sleep 1
+            brew upgrade --formula --greedy-auto-updates 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+            errors=$(cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
+            if [[ $errors ]]; then
+                echo "$errors" > "${ERR_FILE}"
+            fi
+            sleep 1
+            rm "${ASSETS_DIR}/.updating"
+            /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+            echo "Finished brew upgrade --formula --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+        fi
+        if [[ ${1} == 'upgrade-all-casks' ]]; then
+            echo "Starting brew upgrade --cask --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+            touch "${ASSETS_DIR}/.updating"
+            /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+            sleep 1
+            brew upgrade --cask --greedy-auto-updates 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+            errors=$(cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
+            if [[ $errors ]]; then
+                echo "$errors" > "${ERR_FILE}"
+            fi
+            sleep 1
+            rm "${ASSETS_DIR}/.updating"
+            /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
+            echo "Finished brew upgrade --cask --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+        fi
         if [[ ${1} == 'cleanup' ]]; then
             echo "Starting brew cleanup" | add_date | tee -a "${LOG_FILE}"
             brew cleanup
