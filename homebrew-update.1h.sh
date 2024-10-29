@@ -210,11 +210,11 @@ else
     fi
     if [ "$#" -eq 1 ]; then
         if [[ ${1} == 'upgrade-all' ]]; then
-            echo "Starting brew upgrade --greedy-auto-updates" | add_date | tee -a "${LOG_FILE}"
+            echo "Starting brew upgrade --greedy-auto-updates $(echo ${formulae} | tr '\n' ' ')$(echo ${casks} | tr '\n' ' ')" | add_date | tee -a "${LOG_FILE}"
             touch "${ASSETS_DIR}/.updating"
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             sleep 1
-            brew upgrade --greedy-auto-updates 2>&1 | add_date | tee -a "${LOG_FILE}"
+            brew upgrade --greedy-auto-updates $(echo ${formulae} | tr '\n' ' ')$(echo ${casks} | tr '\n' ' ') 2>&1 | add_date | tee -a "${LOG_FILE}"
             errors=$(cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
             if [[ $errors ]]; then
                 echo "$errors" > "${ERR_FILE}"
@@ -225,11 +225,11 @@ else
             echo "Finished brew upgrade --greedy-auto-updates" | add_date | tee -a "${LOG_FILE}"
         fi
         if [[ ${1} == 'upgrade-all-formulae' ]]; then
-            echo "Starting brew upgrade --formula --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+            echo "Starting brew upgrade --formula $(echo ${formulae} | tr '\n' ' ')" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
             touch "${ASSETS_DIR}/.updating"
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             sleep 1
-            brew upgrade --formula --greedy-auto-updates 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+            brew upgrade --formula $(echo ${formulae} | tr '\n' ' ') 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
             errors=$(cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
             if [[ $errors ]]; then
                 echo "$errors" > "${ERR_FILE}"
@@ -240,11 +240,11 @@ else
             echo "Finished brew upgrade --formula --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
         fi
         if [[ ${1} == 'upgrade-all-casks' ]]; then
-            echo "Starting brew upgrade --cask --greedy-auto-updates" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+            echo "Starting brew upgrade --cask --greedy-auto-updates $(echo ${casks} | tr '\n' ' ')" | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
             touch "${ASSETS_DIR}/.updating"
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             sleep 1
-            brew upgrade --cask --greedy-auto-updates 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
+            brew upgrade --cask --greedy-auto-updates $(echo ${casks} | tr '\n' ' ') 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
             errors=$(cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
             if [[ $errors ]]; then
                 echo "$errors" > "${ERR_FILE}"
