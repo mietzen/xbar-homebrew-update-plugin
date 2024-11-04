@@ -98,15 +98,15 @@ if [ $# -eq 0 ]; then
             # Delete File if empty
             rm -rf "${ERR_FILE}"
         else
-            echo "Errors while upgrading: | color=#D92519"
-            errors=$(cat "${ERR_FILE}")
+            echo "Errors while upgrading: | color=#9c1e1e"
+            errors=$(cat "${ERR_FILE}" | sort -u)
             for err_pkg in ${errors}; do
-                echo "- ${err_pkg}"
-                echo "--Show log | bash=/usr/bin/open param1='${LOG_FILE}' terminal=false refresh=true"
-                echo "--Reinstall | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=reinstall param2=${err_pkg} terminal=true refresh=true"
-                echo "--Uninstall | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=uninstall param2=${err_pkg} terminal=true refresh=true"
+                echo "--${err_pkg}"
+                echo "----Show log | bash=/usr/bin/open param1='${LOG_FILE}' terminal=false refresh=true"
+                echo "----Reinstall | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=reinstall param2=${err_pkg} terminal=true refresh=true"
+                echo "----Uninstall | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=uninstall param2=${err_pkg} terminal=true refresh=true"
             done
-            echo "Clear Errors | color=#68696C | bash=rm param1=-rf param2='${ERR_FILE}' terminal=false refresh=true"
+            echo "Clear Errors | color=#68696C | bash=rm param1=-rf param2='${ERR_FILE}' param3='${LOG_FILE}' terminal=false refresh=true"
             echo "---"
         fi
     fi
@@ -118,7 +118,7 @@ if [ $# -eq 0 ]; then
                 echo "${count_formulae} Formulae can be update"
             fi
             for line in ${formulae}; do
-                echo "${ident}${line}" | grep "[a-z]" | sed "s_${ident}\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--cask param3=\1 terminal=${TERM} refresh=true_g"
+                echo "${ident}${line}" | grep "[a-z]" | sed "s_${ident}\(.*\)_& | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade param2=--formulae param3=\1 terminal=${TERM} refresh=true_g"
             done
             if [[ "${count_formulae}" -gt 1 ]]; then
                 echo "Brew Upgrade All Formulae | bash='${SCRIPT_DIR}/${SCRIPT_NAME}' param1=upgrade-all-formulae terminal=${TERM} refresh=true"
@@ -171,6 +171,7 @@ if [ $# -eq 0 ]; then
     echo "Refresh | refresh=true"
 else
     if [ "$#" -gt 0 ]; then
+        rm -rf "${LOG_FILE}"
         nohup caffeinate -dism -w $$ >/dev/null 2>&1 &
     fi
     if [ "$#" -eq 3 ] && [ ${1} == 'upgrade' ]; then
@@ -179,8 +180,9 @@ else
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
         sleep 1
         brew upgrade ${2} ${3} 2>&1 | add_date | tee -a "${LOG_FILE}"
-        cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}' > "${ERR_FILE}"
+        cat "${LOG_FILE}" | grep 'Error:' | awk -F ":" '{print $4}' | sort -u >> "${ERR_FILE}"
         sleep 1
+        rm "${ASSETS_DIR}/.updating"
         /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
         echo "Finished brew upgrade ${2} ${3}" | add_date | tee -a "${LOG_FILE}"
     fi
@@ -215,9 +217,9 @@ else
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             sleep 1
             brew upgrade --greedy-auto-updates $(echo ${formulae} | tr '\n' ' ')$(echo ${casks} | tr '\n' ' ') 2>&1 | add_date | tee -a "${LOG_FILE}"
-            errors=$(cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
+            errors=$(cat "${LOG_FILE}" | grep 'Error:' | awk -F ":" '{print $4}' | sort -u)
             if [[ $errors ]]; then
-                echo "$errors" > "${ERR_FILE}"
+                echo "$errors" >> "${ERR_FILE}"
             fi
             sleep 1
             rm "${ASSETS_DIR}/.updating"
@@ -230,9 +232,9 @@ else
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             sleep 1
             brew upgrade --formula $(echo ${formulae} | tr '\n' ' ') 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
-            errors=$(cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
+            errors=$(cat "${LOG_FILE}" | grep 'Error:' | awk -F ":" '{print $4}' | sort -u)
             if [[ $errors ]]; then
-                echo "$errors" > "${ERR_FILE}"
+                echo "$errors" >> "${ERR_FILE}"
             fi
             sleep 1
             rm "${ASSETS_DIR}/.updating"
@@ -245,9 +247,9 @@ else
             /usr/bin/open --background xbar://app.xbarapp.com/refreshPlugin?path=${SCRIPT_NAME}
             sleep 1
             brew upgrade --cask --greedy-auto-updates $(echo ${casks} | tr '\n' ' ') 2>&1 | add_date | tee -a "${ASSETS_DIR}/brew-upgrade.log"
-            errors=$(cat "${LOG_FILE}" | sed '1,/Error:/d' | grep -E '^[a-zA-Z0-9_\-]+:' | awk -F ":" '{print $1}')
+            errors=$(cat "${LOG_FILE}" | grep 'Error:' | awk -F ":" '{print $4}' | sort -u)
             if [[ $errors ]]; then
-                echo "$errors" > "${ERR_FILE}"
+                echo "$errors" >> "${ERR_FILE}"
             fi
             sleep 1
             rm "${ASSETS_DIR}/.updating"
