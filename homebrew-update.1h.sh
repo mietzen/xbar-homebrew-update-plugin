@@ -27,6 +27,8 @@ add_date() {
     done
 }
 
+touch ${LOG_FILE}
+
 # Logrotate after MAX_LOG_HISTORY number of lines
 if [[ $(wc -l <"${LOG_FILE}") -ge ${MAX_LOG_HISTORY} ]]; then
     tail -n${MAX_LOG_HISTORY} "${LOG_FILE}" > "${LOG_FILE}"
